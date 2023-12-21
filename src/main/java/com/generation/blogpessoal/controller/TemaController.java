@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.generation.blogpessoal.model.Postagem;
 import com.generation.blogpessoal.model.Tema;
 import com.generation.blogpessoal.repository.TemaRepository;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/temas")
@@ -57,15 +58,13 @@ public class TemaController {
 		public ResponseEntity<Tema> post(@RequestBody Tema tema) {
 			return ResponseEntity.status(HttpStatus.CREATED).body(temaRepository.save(tema));
 		}
-	
-
+		
 		@PutMapping
-		public ResponseEntity<Tema> put(@RequestBody Tema tema) {
-			if (!temaRepository.existsById(tema.getId())) {
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-			} else {
-				return ResponseEntity.status(HttpStatus.OK).body(temaRepository.save(tema));
-			}
+		public ResponseEntity<Tema> update(@Valid @RequestBody Tema tema) {
+			return temaRepository.findById(tema.getId())
+					.map(resposta -> ResponseEntity.ok(temaRepository.save(tema)))
+					.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // UPDATE tb_temas SET descricao = ? WHERE
+																					// id = ?;
 		}
 
 		@DeleteMapping("/{id}")
